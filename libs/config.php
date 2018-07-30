@@ -1,11 +1,15 @@
 <?php
-define('BOARDROWS', 10);
-define('BOARDCOLS', 10);
-define('BATTLSHIPSIZE', 5);
-define('BATTLSHIPCOUNT', 1);
-define('DESTROYERSIZE', 4);
-define('DESTROYERCOUNT', 4);
-define('HIDDENSYMBOL', '.');
-define('MISSSYMBOL', '-');
-define('HITSYMBOL', 'X');
+const BOARD_ROWS = 10;
+const BOARD_COLS = 10;
+const BATTLESHIP_SIZE = 5;
+const BATTLESHIP_COUNT = 1;
+const DESTROYER_SIZE = 4;
+const DESTROYER_COUNT = 2;
+const HIDDEN_SYMBOL = '.';
+const MISS_SYMBOL = '-';
+const HIT_SYMBOL = 'X';
+const SHIPS = array(
+    'battleship' => array('count' => 1, 'size' => 5),
+    'destroyer' => array('count' => 2, 'size' => 4)
+);
 

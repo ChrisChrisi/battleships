@@ -1,27 +1,26 @@
 <?php
 
-
-abstract class Ship
+class Ship
 {
-    protected $shipSize;
-    protected $shipCells; // array('b3' => true, 'c3' => false, 'd4' => true );
-    protected $isShipSunk = false;
-
-
-    abstract public function getShipType();
+    protected $shipSize = 0;
+    protected $hitsNumber = 0;
+    public $isSunk = false;
 
     /**
-     * @param $position - the shooting position
-     * @return bool - returns whether the ship is sunk or not
+     * @return bool - return true if the ship is sunk, false if it is not
      */
-    public function shootShip($position){
-        if($this->isShipSunk === false){
-            $this->shipCells[$position] = false;
-            if(!in_array(true, $this->shipCells)){
-                $this->isShipSunk = true;
+    public function hit(){
+        if($this->isSunk === false){
+            $this->hitsNumber += 1;
+            if($this->shipSize === $this->hitsNumber){
+                $this->isSunk = true;
             }
         }
-        return $this->isShipSunk;
+        return $this->isSunk;
+    }
+
+    public function getSize(){
+        return $this->shipSize;
     }
 
 }
