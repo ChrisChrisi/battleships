@@ -1,0 +1,96 @@
+----------------------- Battleships game description -------------------------------------------
+
+This is a single payer game of battleship against the computer.
+To win the game the player should sink the hidden ships in a square grid.
+
+Game characteristics:
+    -> Board size: 10x10 grid
+
+    -> Board legend:
+        - initial state of a square from the board (no shooting was made on it): .
+        - empty square that is shot (missed): -
+        - non empty square that is shot (ship hit): X
+
+    -> Ships: they can touch but not overlap
+        - 1 x Battleship: 5 squares
+        - 2 x Destroyers: 4 squares
+
+    -> Example board:
+          1  2  3  4  5  6  7  8  9  10
+        A .  .  .  .  .  .  .  .  .  .
+        B .  .  .  .  .  .  .  .  .  .
+        C .  .  .  .  .  -  .  .  .  .
+        D .  .  .  .  .  .  .  .  .  .
+        E .  .  .  .  .  .  .  .  .  .
+        F .  .  .  .  .  .  .  .  .  .
+        G -  X  X  X  X  .  .  .  .  .
+        H .  .  .  .  -  .  .  .  .  .
+        I .  .  .  .  .  .  .  .  .  .
+        J .  .  .  .  .  .  .  .  .  .
+
+    -> there should be two blank rows before the board when still there is no message
+    -> when there is a message it is displayed at the top of the page, then there is an empty line, then the board
+    -> after the board there should be two blank rows and then the message "Enter coordinates (row, col), e.g. A5". On the web interface it is followed by input field and submit button.
+    -> the game has two interfaces:
+        - web browser
+        - console
+
+    -> The total game user shots count is stored and displayed in the final message
+
+    -> User input: the input is case insensitive
+        - shooting - guessing the position of the ships
+            -- input format: (row, col), for example: G3
+            -- result: 1) message if the cell was previously non shot and a ship is hit but not sunken: *** Hit ***
+                       2) message if the cell was previously non shot and a ship is hit and sink: *** Sunk ***
+                       3) message if the cell was previously shot  (no matter if the cell is ship part or not) : *** Miss ***
+                       4) when the last part of the last remaining ship is shot:
+                           - the board hides
+                           - the following message appears: "Well done! You completed the game in (count number) shots"
+                           - the user is enabled to choose to start new game (link in web / something else in console)
+        - show remaining not shot ships cells
+             -- input format: show
+             -- result: show only the remaining not shout ships cells:
+                example result:
+                      1  2  3  4  5  6  7  8  9  10
+                    A
+                    B X  X  X  X
+                    C
+                    D
+                    E
+                    F
+                    G
+                    H
+                    I
+                    J X  X     X  X
+             -- ! when in show mode the user enters a board coordinate(shoots) the shoot will be processed and the board will be switched to normal mode
+             -- ! when in show mode and the user enters invalid input the board will the board will be switched to normal mode and the error message will appear
+             -- when show is types when already is typed is executed as normal
+        - reset the game(and board):
+            -- input format:  reset
+            -- result: reinitialize the whole game: ships placement, all cells not shot, user's shots count
+        - ! when incorrect input(non existing coordinates or string != show and reset) is send the following message appears: *** Error ***
+
+
+The code should be formatted in psr2 format.
+Should consistently use only "" quotes or ''.
+Magic numbers should not be used.
+When the game is started(no matter which interface) the board should be shown.
+In the console interface the typed input should appear on the same line as the prompt(Enter coordinates (row, col), e.g. A5 B4 , not Enter coordinates (row, col), e.g. A5 \nB4).
+The game should work on PHP 7
+Do not use session in console version.
+Config should be injected.
+Should use different classes for the two battleships kinds. Also using abstract class with them is good idea.
+Require should be used not include
+Destroyer and Battleship classes should know their own length, not configured by the constructor parameter or setter method.
+Should use only Mixed array() or [].
+404.php and 500.php could use the same template. (So should we have these pages?)
+Models, views and controllers should be separated into folders.
+MVC pattern should be used.
+No display logic should be in the controllers.
+The code should have comments.
+
+
+
+
+
+
