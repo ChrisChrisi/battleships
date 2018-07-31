@@ -5,17 +5,18 @@ class WebGame extends Game
     public function initGame()
     {
         session_start();
+        $this->newGame();
         if (!isset($_SESSION['game'])) {
-            $this->resetGame();
+            $this->newGame();
         } else {
             $this->loadGame($_SESSION['game']);
         }
 
         print_r('<pre>');
-        echo($this->stringifyBoard(true));
+        echo($this->stringifyBoard());
     }
 
-    public function resetGame()
+    public function newGame()
     {
         $this->createNewGame();
         $this->storeGame();

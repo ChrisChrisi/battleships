@@ -1,20 +1,16 @@
 <?php
 
 spl_autoload_register(function ($class) {
-    $places = array(CN_PATH, MD_PATH,VIEWS_PATH);
-    $filename = lcfirst ($class) . '.php';
-    $valid = false;
-    foreach ($places as $place){
-        $file = $place . $filename;
-        $valid = file_exists($file);
-        if($valid === true){
-            break;
+    $places = array(MD_PATH, CN_PATH, VIEWS_PATH);
+    $filename = lcfirst($class).'.php';
+
+    foreach ($places as $place) {
+        $file = $place.$filename;
+        if (file_exists($file) === true) {
+            require_once $file;
+            return true;
         }
     }
-    if ($valid !== false) {
-        require_once $file;
-    } else {
-        return -1;
-    }
-    return true;
+
+    return -1;
 });

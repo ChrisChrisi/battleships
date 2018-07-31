@@ -6,10 +6,6 @@ abstract class Game
     protected $board;
     protected $rowsNames;
     protected $ships;
-    private $firstCIndex = 0;
-    private $firstRIndexNum = 0;
-    private $firstRIndex = 'A';
-    private $lastRIndex;
     private $letters = array();
     private $specialCommands = array('show', 'reset');
     protected $results = array(
@@ -24,7 +20,6 @@ abstract class Game
     public function __construct()
     {
         $this->setLetters();
-        $this->setLastRIndex();
 //        $this->createNewGame();
 //        print_r('<pre>');
 //        echo($this->stringifyBoard(true));
@@ -42,18 +37,13 @@ abstract class Game
 
     private function setLetters()
     {
-        $curLetter = $this->firstRIndex;
+        $curLetter = 'A';
         $curIndex = 0;
         while ($curIndex < BOARD_ROWS) {
             $this->letters[] = $curLetter;
             $curLetter++;
             $curIndex++;
         }
-    }
-
-    private function setLastRIndex()
-    {
-        $this->lastRIndex = $this->getLetter($this->firstRIndexNum, BOARD_ROWS);
     }
 
     protected function createNewGame()
@@ -64,8 +54,7 @@ abstract class Game
 
     private function initBoard()
     {
-        $last = ++$this->lastRIndex;
-        for ($rindex = $this->firstRIndex; $rindex !== $last; $rindex++) {
+        foreach($this->letters as $rindex){
             $this->board[$rindex] = array();
             for ($cindex = 1; $cindex <= BOARD_COLS; $cindex++) {
                 $this->board[$rindex][$cindex] = array('ship' => null, 'symbol' => HIDDEN_SYMBOL);
@@ -75,34 +64,32 @@ abstract class Game
 
     private function initShips()
     {
-        $count= 0;
+        $shipIndex=0;
         foreach (SHIPS as $type => $info) {
             for ($index = 0; $index < $info['count']; $index++) {
-                $this->ships[] = $this->setShipToBoard(ShipFactory::create($type), $count);
-                $count+=1;
+                $this->ships[] = $this->setShipToBoard(ShipFactory::create($type), $shipIndex);
+                $shipIndex++;
             }
         }
     }
 
-    private function setShipToBoard($ship, $sindex)
+    private function setShipToBoard($ship, $shipIndex)
     {
         $rNum = mt_rand(0, BOARD_ROWS - 1);
-        $rindex = $this->getLetter($this->firstRIndexNum, $rNum);
-        $cindex = mt_rand($this->firstCIndex, $this->firstCIndex + BOARD_COLS - 1);
+        $rindex = $this->letters[$rNum];
+        $cindex = mt_rand(1, BOARD_COLS);
         if (isset($this->board[$rindex]) && isset($this->board[$rindex][$cindex]) && is_null($this->board[$rindex][$cindex]['ship'])) {
             $placement = $this->getAvailablePlace($rNum, $rindex, $cindex, $ship->getSize());
             if ($placement !== false) {
                 $ship->setPlacement($placement);
-                $this->ships[$sindex] = $ship;
-                $count = 0;
+                $this->ships[$shipIndex] = $ship;
                 foreach ($placement as $place){
-                    $this->board[$place['rindex']][$place['cindex']]['ship'] = $sindex;
-                    $count += 1;
+                    $this->board[$place['rindex']][$place['cindex']]['ship'] = $shipIndex;
                 }
                 return true;
             }
         }
-        $this->setShipToBoard($ship, $sindex);
+        $this->setShipToBoard($ship, $shipIndex);
     }
 
     private function getAvailablePlace($rindexNum, $rindex, $cindex, $size)
@@ -122,9 +109,7 @@ abstract class Game
 
     private function checkAvailability($rindexNum, $rindex, $cindex, $size, $direction)
     {
-        $size -= 1;
-
-        $this->getLetter($rindexNum, $size, false);
+        $size--;
         switch ($direction) {
             case 'up':
                 $firstRIndexNum = $rindexNum - $size;
@@ -156,7 +141,7 @@ abstract class Game
                     $available[] = array('rindex' => $this->letters[$index], 'cindex' => $cindex);
                 }
             }
-        } else if ($firstCIndex > $this->firstCIndex && $lastCIndex < $this->firstCIndex + BOARD_COLS && isset($this->board[$rindex][$lastCIndex]) && is_null($this->board[$rindex][$lastCIndex]['ship'])) {
+        } elseif ($firstCIndex > 0 && $lastCIndex < BOARD_COLS && isset($this->board[$rindex][$lastCIndex]) && is_null($this->board[$rindex][$lastCIndex]['ship'])) {
                 for ($index = $firstCIndex; $index <= $lastCIndex; $index++) {
                     if (!is_null($this->board[$rindex][$index]['ship'])) {
                         $available = false;
@@ -164,8 +149,6 @@ abstract class Game
                     }
                     $available[] = array('rindex' => $rindex, 'cindex' => $index);
                 }
-        } else {
-            $available = false;
         }
         return $available;
     }
@@ -177,11 +160,11 @@ abstract class Game
     //debug functiom should be cleared
     public function stringifyBoard($ships = true){
         $count = 0;
-        $string = ' ';
+        $string = chr(10).' ';
         for($i = 1; $i<= BOARD_COLS; $i++){
-            $string .= ' '. $i;
+            $string .= '  '. $i;
         }
-        $string .= '<br>';
+        $string .= chr(10);
         if($ships){
             foreach ($this->board as $index => $row){
                 $string .= $index;
@@ -193,22 +176,22 @@ abstract class Game
                         $string .= '  ';
                     }
                 }
-                $string .= '<br>';
+                $string .= chr(10);
             }
-            echo('total ship cells : '.$count . '<br><br>');
+            echo('total ship cells : '.$count . chr(10));
         } else {
             foreach ($this->board as $index => $row){
                 $string .= $index;
                 foreach ($row as $cell){
-                        $string .= ' '.$cell['symbol'];
+                        $string .= '  '.$cell['symbol'];
                 }
-                $string .= '<br>';
+                $string .= chr(10);
             }
         }
         return $string;
 
     }
     abstract public function initGame();
-    abstract public function resetGame();
+    abstract public function newGame();
     abstract protected function getUserInput();
 }

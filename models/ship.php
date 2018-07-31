@@ -25,7 +25,7 @@ class Ship
     }
 
     public function setPlacement($placement){
-        $this->placement= $placement;
+        $this->placement = $placement;
     }
 
     public function getPlacement(){
