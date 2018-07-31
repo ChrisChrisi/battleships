@@ -6,78 +6,126 @@ abstract class Game
     protected $board;
     protected $rowsNames;
     protected $ships;
+    private $firstCIndex = 0;
+    private $firstRIndexNum = 0;
     private $firstRIndex = 'A';
+    private $lastRIndex;
+    private $letters = array();
 
     //protected $ships = array(0 => $shipObj0, 1=>$shipObj1);
 
     public function __construct()
     {
-        $this->initBoard();
+        $this->setLetters();
+        $this->setLastRIndex();
+        $this->createNewGame();
     }
 
-    private function initBoard($hits = null)
+    private function getLetter($letterNumber, $offset, $add = true)
     {
-        $lastRowLetter = $this->firstRIndex + BOARD_ROWS;
-        for ($rindex = $this->firstRIndex; $rindex <= $lastRowLetter; $rindex++) {
+        $offset -= 1;
+        if ($add) {
+            return isset($this->letters[$letterNumber + $offset]) ? $this->letters[$letterNumber + $offset] : false;
+        } else {
+            return isset($this->letters[$letterNumber - $offset]) ? $this->letters[$letterNumber - $offset] : false;
+        }
+    }
+
+    private function setLetters()
+    {
+        $curLetter = $this->firstRIndex;
+        $curIndex = 0;
+        while ($curIndex < BOARD_ROWS) {
+            $this->letters[] = $curLetter;
+            $curLetter++;
+            $curIndex++;
+        }
+    }
+
+    private function setLastRIndex()
+    {
+        $this->lastRIndex = $this->getLetter($this->firstRIndexNum, BOARD_ROWS);
+    }
+
+    private function createNewGame()
+    {
+        $this->initBoard();
+        $this->initShips();
+        print_r('<pre>');
+        echo($this->stringifyBoard(true));
+    }
+
+    private function initBoard()
+    {
+        $last = ++$this->lastRIndex;
+        for ($rindex = $this->firstRIndex; $rindex !== $last; $rindex++) {
             $this->board[$rindex] = array();
-            for ($cindex = 1; $cindex < BOARD_COLS; $cindex++) {
+            for ($cindex = 1; $cindex <= BOARD_COLS; $cindex++) {
                 $this->board[$rindex][$cindex] = array('ship' => null, 'symbol' => HIDDEN_SYMBOL);
-                //$this->board[$rindex][$cindex] =( isset($hits) && isset($hits[$rindex][$cindex])) ? $hits[$rindex][$cindex] : HIDDEN_SYMBOL;
             }
         }
     }
 
     private function initShips()
     {
+        $count= 0;
         foreach (SHIPS as $type => $info) {
             for ($index = 0; $index < $info['count']; $index++) {
-                $this->ships[] = $this->setShipToBoard(new ShipFactory($type));
+                $this->ships[] = $this->setShipToBoard(ShipFactory::create($type), $count);
+                $count+=1;
             }
         }
     }
 
-    private function setShipToBoard($ship)
+    private function setShipToBoard($ship, $sindex)
     {
-        $rindex = $this->firstRIndex + mt_rand(0, BOARD_ROWS);
-        $cindex = mt_rand(1, BOARD_COLS);
-        if(is_null($this->board[$rindex][$cindex]['ship'])){
-            $place = $this->getAvailablePlace($rindex, $cindex, $ship->getSize());
-            if($place !== false){
-
+        $rNum = mt_rand(0, BOARD_ROWS - 1);
+        $rindex = $this->getLetter($this->firstRIndexNum, $rNum);
+        $cindex = mt_rand($this->firstCIndex, $this->firstCIndex + BOARD_COLS - 1);
+        if (isset($this->board[$rindex]) && isset($this->board[$rindex][$cindex]) && is_null($this->board[$rindex][$cindex]['ship'])) {
+            $placement = $this->getAvailablePlace($rNum, $rindex, $cindex, $ship->getSize());
+            if ($placement !== false) {
+                $ship->setPlacement($placement);
+                $this->ships[$sindex] = $ship;
+                $count = 0;
+                foreach ($placement as $place){
+                    $this->board[$place['rindex']][$place['cindex']]['ship'] = $sindex;
+                    $count += 1;
+                }
+                return true;
             }
-
         }
-        return $this->setShipToBoard($ship);
-
+        $this->setShipToBoard($ship, $sindex);
     }
 
-    private function getAvailablePlace($rindex, $cindex, $size){
-        $availablePlaces = array();
+    private function getAvailablePlace($rindexNum, $rindex, $cindex, $size)
+    {
+        $availablePlace = false;
         $directons = array('up', 'down', 'right', 'left');
-        foreach($directons as $directon){
-            $available = $this->checkAvailability($rindex, $cindex, $size, $directon);
-            if($available !== false){
-                $availablePlaces[] = $available;
+        shuffle($directons);
+        foreach ($directons as $directon) {
+            $available = $this->checkAvailability($rindexNum, $rindex, $cindex, $size, $directon);
+            if ($available !== false) {
+                $availablePlace = $available;
+                break;
             }
         }
-
-        if(count($availablePlaces) == 0){
-            return false;
-        }
-
-        return $availablePlaces[mt_rand(0, count($availablePlaces) - 1)];
+        return $availablePlace;
     }
 
-    private function checkAvailability($rindex, $cindex, $size, $direction){
+    private function checkAvailability($rindexNum, $rindex, $cindex, $size, $direction)
+    {
         $size -= 1;
-        switch($direction){
+
+        $this->getLetter($rindexNum, $size, false);
+        switch ($direction) {
             case 'up':
-                $firstRIndex = $rindex - $size;
-                $lastRIndex = $rindex;
+                $firstRIndexNum = $rindexNum - $size;
+                $lastRIndexNum = $rindexNum;
                 break;
             case 'down':
-                $firstRIndex = $rindex;
-                $lastRIndex = $rindex + $size;
+                $firstRIndexNum = $rindexNum;
+                $lastRIndexNum = $rindexNum + $size;
                 break;
             case 'right':
                 $firstCIndex = $cindex;
@@ -89,31 +137,65 @@ abstract class Game
                 break;
 
         }
-        $available = array();
-        if(isset($firstRIndex)){
-            if(isset($this->board[$lastRIndex][$cindex]) && is_null($this->board[$lastRIndex][$cindex]['ship'])){
-                for($index = $lastRIndex - 1; $index > $rindex; $index--){
-                    if(!is_null($this->board[$index][$cindex]['ship'])){
-                        $available = false;
-                        break;
-                    }
-                    $available[] = array($index, $cindex);
-                }
-            }
-        } else {
-            if(isset($this->board[$rindex][$lastCIndex]) && is_null($this->board[$rindex][$lastCIndex]['ship'])){
-                for($index = $lastCIndex - 1; $index > $cindex; $index--){
-                    if(!is_null($this->board[$rindex][$index]['ship'])){
-                        $available = false;
-                        break;
-                    }
-                    $available[] = array($rindex, $index);
-                }
-            }
 
+        $available = false;
+        if (isset($firstRIndexNum)) {
+            if (isset($this->letters[$firstRIndexNum]) && isset($this->letters[$lastRIndexNum]) && is_null($this->board[$this->letters[$lastRIndexNum]][$cindex]['ship'])) {
+                for ($index = $firstRIndexNum; $index <= $lastRIndexNum; $index++) {
+                    if (!is_null($this->board[$this->letters[$index]][$cindex]['ship'])) {
+                        $available = false;
+                        return false;
+                    }
+                    $available[] = array('rindex' => $this->letters[$index], 'cindex' => $cindex);
+                }
+            }
+        } else if ($firstCIndex > $this->firstCIndex && $lastCIndex < $this->firstCIndex + BOARD_COLS && isset($this->board[$rindex][$lastCIndex]) && is_null($this->board[$rindex][$lastCIndex]['ship'])) {
+                for ($index = $firstCIndex; $index <= $lastCIndex; $index++) {
+                    if (!is_null($this->board[$rindex][$index]['ship'])) {
+                        $available = false;
+                        break;
+                    }
+                    $available[] = array('rindex' => $rindex, 'cindex' => $index);
+                }
+        } else {
+            $available = false;
         }
         return $available;
     }
 
+    //debug functiom should be cleared
+    public function stringifyBoard($ships = true){
+        $count = 0;
+        $string = ' ';
+        for($i = 1; $i<= BOARD_COLS; $i++){
+            $string .= ' '. $i;
+        }
+        $string .= '<br>';
+        if($ships){
+            foreach ($this->board as $index => $row){
+                $string .= $index;
+                foreach ($row as $cell){
+                    if(!is_null($cell['ship'])){
+                        $string .= ' X';
+                        $count+=1;
+                    } else {
+                        $string .= '  ';
+                    }
+                }
+                $string .= '<br>';
+            }
+            echo('total ship cells : '.$count . '<br><br>');
+        } else {
+            foreach ($this->board as $index => $row){
+                $string .= $index;
+                foreach ($row as $cell){
+                        $string .= ' '.$cell['symbol'];
+                }
+                $string .= '<br>';
+            }
+        }
+        return $string;
+
+    }
     abstract protected function readInput();
 }

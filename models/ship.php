@@ -3,6 +3,7 @@
 class Ship
 {
     protected $shipSize = 0;
+    protected $placement;
     protected $hitsNumber = 0;
     public $isSunk = false;
 
@@ -21,6 +22,14 @@ class Ship
 
     public function getSize(){
         return $this->shipSize;
+    }
+
+    public function setPlacement($placement){
+        $this->placement= $placement;
+    }
+
+    public function getPlacement(){
+        return $this->placement;
     }
 
 }

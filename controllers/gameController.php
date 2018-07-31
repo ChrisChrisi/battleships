@@ -10,7 +10,6 @@ class GameController
 
     public function startGame(){
         $game = new GameFactory($this->interfaceType);
-        $game->play();
     }
 
 }

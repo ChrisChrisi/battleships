@@ -8,7 +8,7 @@ class GameFactory
 
     public function __construct($type)
     {
-        return ($type == 'console')? new consoleHandler() : new consoleHandler();
+        return ($type == 'console')? new ConsoleGame() : new WebGame();
 
     }
 

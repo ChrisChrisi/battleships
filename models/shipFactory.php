@@ -2,10 +2,9 @@
 
 class ShipFactory
 {
-    public function __construct($type)
+    public static function create($type)
     {
         return ($type == 'battleship')? new Battleship() : new Destroyer();
-
     }
 
 }
