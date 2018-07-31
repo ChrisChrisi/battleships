@@ -3,7 +3,7 @@ define('LIBS_PATH',  dirname(__FILE__) . '/');
 define('PATH', LIBS_PATH . '../');
 define('CN_PATH', PATH . 'controllers/');
 define('MD_PATH', PATH . 'models/');
-define('VIEWS_PATH', PATH . 'views/');
+define('VIEW_PATH', PATH . 'view/');
 
 const BOARD_ROWS = 10;
 const BOARD_COLS = 10;

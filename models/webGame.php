@@ -5,15 +5,12 @@ class WebGame extends Game
     public function initGame()
     {
         session_start();
-        $this->newGame();
         if (!isset($_SESSION['game'])) {
             $this->newGame();
         } else {
             $this->loadGame($_SESSION['game']);
         }
-
-        print_r('<pre>');
-        echo($this->stringifyBoard());
+        $this->play();
     }
 
     public function newGame()
@@ -24,6 +21,7 @@ class WebGame extends Game
 
     protected function getUserInput()
     {
+        return isset($_POST['coord']) ? trim($_POST['coord']) : '';
     }
 
     private function storeGame()
@@ -38,5 +36,13 @@ class WebGame extends Game
     {
         $this->ships = $game['ships'];
         $this->board = $game['board'];
+    }
+
+    public function show()
+    {
+        $data = $this->stringifyBoard(false);
+        $message = $this->message;
+        require VIEW_PATH.'web.php';
+
     }
 }

@@ -7,13 +7,8 @@ abstract class Game
     protected $rowsNames;
     protected $ships;
     private $letters = array();
-    private $specialCommands = array('show', 'reset');
-    protected $results = array(
-        'error' => '*** Error ***',
-        'sunk' => '*** Sunk ***',
-        'miss' => '*** Miss ***',
-        'hit' => '*** Hit ***'
-        );
+    private $displayMode = 'default';
+    public $message = false;
 
     //protected $ships = array(0 => $shipObj0, 1=>$shipObj1);
 
@@ -54,7 +49,7 @@ abstract class Game
 
     private function initBoard()
     {
-        foreach($this->letters as $rindex){
+        foreach ($this->letters as $rindex) {
             $this->board[$rindex] = array();
             for ($cindex = 1; $cindex <= BOARD_COLS; $cindex++) {
                 $this->board[$rindex][$cindex] = array('ship' => null, 'symbol' => HIDDEN_SYMBOL);
@@ -64,7 +59,7 @@ abstract class Game
 
     private function initShips()
     {
-        $shipIndex=0;
+        $shipIndex = 0;
         foreach (SHIPS as $type => $info) {
             for ($index = 0; $index < $info['count']; $index++) {
                 $this->ships[] = $this->setShipToBoard(ShipFactory::create($type), $shipIndex);
@@ -83,7 +78,7 @@ abstract class Game
             if ($placement !== false) {
                 $ship->setPlacement($placement);
                 $this->ships[$shipIndex] = $ship;
-                foreach ($placement as $place){
+                foreach ($placement as $place) {
                     $this->board[$place['rindex']][$place['cindex']]['ship'] = $shipIndex;
                 }
                 return true;
@@ -142,48 +137,83 @@ abstract class Game
                 }
             }
         } elseif ($firstCIndex > 0 && $lastCIndex < BOARD_COLS && isset($this->board[$rindex][$lastCIndex]) && is_null($this->board[$rindex][$lastCIndex]['ship'])) {
-                for ($index = $firstCIndex; $index <= $lastCIndex; $index++) {
-                    if (!is_null($this->board[$rindex][$index]['ship'])) {
-                        $available = false;
-                        break;
-                    }
-                    $available[] = array('rindex' => $rindex, 'cindex' => $index);
+            for ($index = $firstCIndex; $index <= $lastCIndex; $index++) {
+                if (!is_null($this->board[$rindex][$index]['ship'])) {
+                    $available = false;
+                    break;
                 }
+                $available[] = array('rindex' => $rindex, 'cindex' => $index);
+            }
         }
         return $available;
     }
 
-    protected function processUserMove($value){
-
+    protected function play()
+    {
+        $result = false;
+        $userInput = $this->getUserInput();
+        if (strlen($userInput) == 0) {
+            $result = true;
+        } else {
+            $userAction = new UserAction($userInput);
+            $action = $userAction->processCommand();
+            $functionName = 'command'.lcfirst($action['command']);
+            if ($action['command'] === 'play') {
+                $this->commandPlay($action['coordinates']);
+            } else {
+                $result = is_callable(array($this, $functionName)) ? $this->{$functionName}() : false;
+            }
+        }
+        if($result === false){
+            $this->commandError();
+        }
     }
 
-    //debug functiom should be cleared
-    public function stringifyBoard($ships = true){
+    public function commandPlay()
+    {
+    }
+
+    public function commandShow()
+    {
+    }
+
+    public function commandReset()
+    {
+    }
+
+    public function commandError()
+    {
+        $this->message = Messages::getMessage('error');
+    }
+
+    //debug function should be cleared
+    public function stringifyBoard($ships = true)
+    {
         $count = 0;
-        $string = chr(10).' ';
-        for($i = 1; $i<= BOARD_COLS; $i++){
-            $string .= '  '. $i;
+        $string = '';
+        for ($i = 1; $i <= BOARD_COLS; $i++) {
+            $string .= '  '.$i;
         }
         $string .= chr(10);
-        if($ships){
-            foreach ($this->board as $index => $row){
+        if ($ships) {
+            foreach ($this->board as $index => $row) {
                 $string .= $index;
-                foreach ($row as $cell){
-                    if(!is_null($cell['ship'])){
+                foreach ($row as $cell) {
+                    if (!is_null($cell['ship'])) {
                         $string .= ' X';
-                        $count+=1;
+                        $count += 1;
                     } else {
                         $string .= '  ';
                     }
                 }
                 $string .= chr(10);
             }
-            echo('total ship cells : '.$count . chr(10));
+//            echo('total ship cells : '.$count.chr(10));
         } else {
-            foreach ($this->board as $index => $row){
+            foreach ($this->board as $index => $row) {
                 $string .= $index;
-                foreach ($row as $cell){
-                        $string .= '  '.$cell['symbol'];
+                foreach ($row as $cell) {
+                    $string .= '  '.$cell['symbol'];
                 }
                 $string .= chr(10);
             }
@@ -191,7 +221,12 @@ abstract class Game
         return $string;
 
     }
+
     abstract public function initGame();
+
     abstract public function newGame();
+
     abstract protected function getUserInput();
+
+    abstract public function show();
 }

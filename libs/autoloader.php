@@ -1,7 +1,7 @@
 <?php
 
 spl_autoload_register(function ($class) {
-    $places = array(MD_PATH, CN_PATH, VIEWS_PATH);
+    $places = array(MD_PATH, CN_PATH);
     $filename = lcfirst($class).'.php';
 
     foreach ($places as $place) {
