@@ -11,6 +11,13 @@ abstract class Game
     private $firstRIndex = 'A';
     private $lastRIndex;
     private $letters = array();
+    private $specialCommands = array('show', 'reset');
+    protected $results = array(
+        'error' => '*** Error ***',
+        'sunk' => '*** Sunk ***',
+        'miss' => '*** Miss ***',
+        'hit' => '*** Hit ***'
+        );
 
     //protected $ships = array(0 => $shipObj0, 1=>$shipObj1);
 
@@ -18,7 +25,9 @@ abstract class Game
     {
         $this->setLetters();
         $this->setLastRIndex();
-        $this->createNewGame();
+//        $this->createNewGame();
+//        print_r('<pre>');
+//        echo($this->stringifyBoard(true));
     }
 
     private function getLetter($letterNumber, $offset, $add = true)
@@ -47,12 +56,10 @@ abstract class Game
         $this->lastRIndex = $this->getLetter($this->firstRIndexNum, BOARD_ROWS);
     }
 
-    private function createNewGame()
+    protected function createNewGame()
     {
         $this->initBoard();
         $this->initShips();
-        print_r('<pre>');
-        echo($this->stringifyBoard(true));
     }
 
     private function initBoard()
@@ -144,7 +151,7 @@ abstract class Game
                 for ($index = $firstRIndexNum; $index <= $lastRIndexNum; $index++) {
                     if (!is_null($this->board[$this->letters[$index]][$cindex]['ship'])) {
                         $available = false;
-                        return false;
+                        break;
                     }
                     $available[] = array('rindex' => $this->letters[$index], 'cindex' => $cindex);
                 }
@@ -161,6 +168,10 @@ abstract class Game
             $available = false;
         }
         return $available;
+    }
+
+    protected function processUserMove($value){
+
     }
 
     //debug functiom should be cleared
@@ -197,5 +208,7 @@ abstract class Game
         return $string;
 
     }
-    abstract protected function readInput();
+    abstract public function initGame();
+    abstract public function resetGame();
+    abstract protected function getUserInput();
 }

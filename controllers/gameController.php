@@ -9,7 +9,8 @@ class GameController
     }
 
     public function startGame(){
-        $game = new GameFactory($this->interfaceType);
+        $game =  GameFactory::create($this->interfaceType);
+        $game->initGame();
     }
 
 }

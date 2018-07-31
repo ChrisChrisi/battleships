@@ -6,7 +6,7 @@ class GameFactory
     private $remainingShips;
     private $handler;
 
-    public function __construct($type)
+    public static function create($type)
     {
         return ($type == 'console')? new ConsoleGame() : new WebGame();
 
