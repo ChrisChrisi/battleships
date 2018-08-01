@@ -3,10 +3,10 @@
 
 <pre>
 <?php
-    if ($message != false) {
-        echo $message;
+    if ($this->message != false) {
+        echo $this->message;
     }
-    echo chr(10).chr(10).$data;
+    echo NEW_LINE.NEW_LINE.$data;
 ?>
 </pre>
 <br>

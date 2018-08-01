@@ -28,7 +28,7 @@ class UserAction
     public function formatResult($command, $coordinates = false){
         $result = array('command' => $command);
         if(isset($coordinates)){
-            $result['coordinates'] = array('rindex' => $coordinates[0], 'cindex' => $coordinates[1]);
+            $result['coordinates'] = array('rindex' => strtoupper($coordinates[0]), 'cindex' => (int)$coordinates[1]);
         }
         return $result;
     }

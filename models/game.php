@@ -8,6 +8,7 @@ abstract class Game
     protected $ships;
     private $letters = array();
     private $displayMode = 'play';
+    protected $remainingShips;
     public $message = false;
 
     public function __construct()
@@ -30,6 +31,7 @@ abstract class Game
     {
         $this->initBoard();
         $this->initShips();
+        $this->playerTurns = 0;
     }
 
     private function initBoard()
@@ -51,6 +53,7 @@ abstract class Game
                 $shipIndex++;
             }
         }
+        $this->remainingShips = $shipIndex;
     }
 
     private function setShipToBoard($ship, $shipIndex)
@@ -139,12 +142,13 @@ abstract class Game
         $userInput = $this->getUserInput();
         if (strlen($userInput) == 0) {
             $result = true;
+            $this->message = false;
         } else {
             $userAction = new UserAction($userInput);
             $action = $userAction->processCommand();
             $functionName = 'command' . lcfirst($action['command']);
             if ($action['command'] === 'play') {
-                $this->commandPlay($action['coordinates']);
+                $result = $this->commandPlay($action['coordinates']);
             } else {
                 $result = is_callable(array($this, $functionName)) ? $this->{$functionName}() : false;
             }
@@ -154,66 +158,106 @@ abstract class Game
         }
     }
 
-    public function commandPlay()
+    public function commandPlay($coordinates)
     {
+        $this->displayMode = 'play';
+        if (!isset($this->board[$coordinates['rindex']]) || !isset($this->board[$coordinates['rindex']][$coordinates['cindex']])) {
+
+            $this->commandError();
+            return false;
+        }
+        $this->playerTurns++;
+        $this->shoot($coordinates);
+        return true;
     }
 
     public function commandShow()
     {
+        $this->displayMode = 'show';
+        $this->message = false;
     }
 
     public function commandReset()
     {
+        $this->displayMode = 'play';
+        $this->createNewGame();
     }
 
     public function commandError()
     {
+        $this->displayMode = 'play';
         $this->message = Messages::getMessage('error');
+    }
+
+    private function shoot($coordinates)
+    {
+        $cell = $this->board[$coordinates['rindex']][$coordinates['cindex']];
+        if ($cell['symbol'] !== HIDDEN_SYMBOL) {
+            $this->message = Messages::getMessage('miss');
+        } else {
+            if (is_null($cell['ship'])) {
+                $this->board[$coordinates['rindex']][$coordinates['cindex']]['symbol'] = MISS_SYMBOL;
+                $this->message = Messages::getMessage('miss');
+            } else {
+                $this->board[$coordinates['rindex']][$coordinates['cindex']]['symbol'] = HIT_SYMBOL;
+                $ship = $this->ships[$cell['ship']];
+                $ship->hit();
+                if ($ship->isSunk) {
+                    --$this->remainingShips;
+                    if($this->remainingShips < 1){
+                        $this->message = Messages::getMessage('win');
+                        $this->message = str_replace("%count",$this->playerTurns,$this->message);
+                    } else {
+                        $this->message = Messages::getMessage('sunk');
+                    }
+                } else {
+                    $this->message = Messages::getMessage('hit');
+                }
+            }
+        }
     }
 
     public function stringifyBoard()
     {
-        $newLine = chr(10);
-        $space = ' ';
-        return $this->displayMode === 'play' ? $this->showPlayBoard($newLine, $space) : $this->showRemainingShips($newLine, $space);
+        return $this->displayMode === 'play' ? $this->showPlayBoard() : $this->showRemainingShips();
 
     }
 
-    public function showRemainingShips($newLine, $space)
+    public function showRemainingShips()
     {
         $string = '';
         for ($i = 1; $i <= BOARD_COLS; $i++) {
-            $string .= $space . $space . $i;
+            $string .= SPACE . SPACE . $i;
         }
-        $string .= $newLine;
+        $string .= NEW_LINE;
         foreach ($this->board as $index => $row) {
-            $string .= $index . $space;
+            $string .= $index . SPACE;
             foreach ($row as $cell) {
                 if (!is_null($cell['ship']) && $cell['symbol'] != HIT_SYMBOL) {
-                    $string .= 'X' . $space . $space;
+                    $string .= 'X' . SPACE . SPACE;
                 } else {
-                    $string .= $space . $space . $space;
+                    $string .= SPACE . SPACE . SPACE;
                 }
             }
-            $string .= $newLine;
+            $string .= NEW_LINE;
         }
         return $string;
     }
 
-    public function showPlayBoard($newLine, $space)
+    public function showPlayBoard()
     {
         $string = '';
         for ($i = 1; $i <= BOARD_COLS; $i++) {
-            $string .= $space . $space . $i;
+            $string .= SPACE . SPACE . $i;
         }
-        $string .= $newLine;
+        $string .= NEW_LINE;
 
         foreach ($this->board as $index => $row) {
-            $string .= $index . $space;
+            $string .= $index . SPACE;
             foreach ($row as $cell) {
-                $string .= $cell['symbol'] . $space . $space;
+                $string .= $cell['symbol'] . SPACE . SPACE;
             }
-            $string .= $newLine;
+            $string .= NEW_LINE;
         }
         return $string;
     }

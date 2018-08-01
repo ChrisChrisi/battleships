@@ -5,11 +5,15 @@ define('CN_PATH', PATH . 'controllers/');
 define('MD_PATH', PATH . 'models/');
 define('VIEW_PATH', PATH . 'view/');
 
+define('NEW_LINE', chr(10));
+const SPACE = ' ';
+
 const BOARD_ROWS = 10;
 const BOARD_COLS = 10;
 const HIDDEN_SYMBOL = '.';
 const MISS_SYMBOL = '-';
 const HIT_SYMBOL = 'X';
+
 const SHIPS = array(
     'battleship' => array('count' => 1, 'size' => 5),
     'destroyer' => array('count' => 2, 'size' => 4)
