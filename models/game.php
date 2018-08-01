@@ -7,27 +7,12 @@ abstract class Game
     protected $rowsNames;
     protected $ships;
     private $letters = array();
-    private $displayMode = 'default';
+    private $displayMode = 'play';
     public $message = false;
-
-    //protected $ships = array(0 => $shipObj0, 1=>$shipObj1);
 
     public function __construct()
     {
         $this->setLetters();
-//        $this->createNewGame();
-//        print_r('<pre>');
-//        echo($this->stringifyBoard(true));
-    }
-
-    private function getLetter($letterNumber, $offset, $add = true)
-    {
-        $offset -= 1;
-        if ($add) {
-            return isset($this->letters[$letterNumber + $offset]) ? $this->letters[$letterNumber + $offset] : false;
-        } else {
-            return isset($this->letters[$letterNumber - $offset]) ? $this->letters[$letterNumber - $offset] : false;
-        }
     }
 
     private function setLetters()
@@ -157,14 +142,14 @@ abstract class Game
         } else {
             $userAction = new UserAction($userInput);
             $action = $userAction->processCommand();
-            $functionName = 'command'.lcfirst($action['command']);
+            $functionName = 'command' . lcfirst($action['command']);
             if ($action['command'] === 'play') {
                 $this->commandPlay($action['coordinates']);
             } else {
                 $result = is_callable(array($this, $functionName)) ? $this->{$functionName}() : false;
             }
         }
-        if($result === false){
+        if ($result === false) {
             $this->commandError();
         }
     }
@@ -186,40 +171,51 @@ abstract class Game
         $this->message = Messages::getMessage('error');
     }
 
-    //debug function should be cleared
-    public function stringifyBoard($ships = true)
+    public function stringifyBoard()
     {
-        $count = 0;
+        $newLine = chr(10);
+        $space = ' ';
+        return $this->displayMode === 'play' ? $this->showPlayBoard($newLine, $space) : $this->showRemainingShips($newLine, $space);
+
+    }
+
+    public function showRemainingShips($newLine, $space)
+    {
         $string = '';
         for ($i = 1; $i <= BOARD_COLS; $i++) {
-            $string .= '  '.$i;
+            $string .= $space . $space . $i;
         }
-        $string .= chr(10);
-        if ($ships) {
-            foreach ($this->board as $index => $row) {
-                $string .= $index;
-                foreach ($row as $cell) {
-                    if (!is_null($cell['ship'])) {
-                        $string .= ' X';
-                        $count += 1;
-                    } else {
-                        $string .= '  ';
-                    }
+        $string .= $newLine;
+        foreach ($this->board as $index => $row) {
+            $string .= $index . $space;
+            foreach ($row as $cell) {
+                if (!is_null($cell['ship']) && $cell['symbol'] != HIT_SYMBOL) {
+                    $string .= 'X' . $space . $space;
+                } else {
+                    $string .= $space . $space . $space;
                 }
-                $string .= chr(10);
             }
-//            echo('total ship cells : '.$count.chr(10));
-        } else {
-            foreach ($this->board as $index => $row) {
-                $string .= $index;
-                foreach ($row as $cell) {
-                    $string .= '  '.$cell['symbol'];
-                }
-                $string .= chr(10);
-            }
+            $string .= $newLine;
         }
         return $string;
+    }
 
+    public function showPlayBoard($newLine, $space)
+    {
+        $string = '';
+        for ($i = 1; $i <= BOARD_COLS; $i++) {
+            $string .= $space . $space . $i;
+        }
+        $string .= $newLine;
+
+        foreach ($this->board as $index => $row) {
+            $string .= $index . $space;
+            foreach ($row as $cell) {
+                $string .= $cell['symbol'] . $space . $space;
+            }
+            $string .= $newLine;
+        }
+        return $string;
     }
 
     abstract public function initGame();

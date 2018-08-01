@@ -5,6 +5,7 @@ class WebGame extends Game
     public function initGame()
     {
         session_start();
+        $this->newGame();
         if (!isset($_SESSION['game'])) {
             $this->newGame();
         } else {
@@ -40,7 +41,7 @@ class WebGame extends Game
 
     public function show()
     {
-        $data = $this->stringifyBoard(false);
+        $data = $this->stringifyBoard(true);
         $message = $this->message;
         require VIEW_PATH.'web.php';
 

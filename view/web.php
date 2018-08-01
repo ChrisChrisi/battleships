@@ -11,7 +11,7 @@
 </pre>
 <br>
 <form name="input" action="index.php" method="post">
-    Enter coordinates (row, col), e.g. A5 <input type="input" size="5" name="coord" autocomplete="off" autofocus>
+    <?php echo Messages::getMessage('prompt')?> <input type="input" size="5" name="coord" autocomplete="off" autofocus>
     <input type="submit">
 </form>
 </body>
