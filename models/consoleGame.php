@@ -30,8 +30,11 @@ class consoleGame extends Game
 
     public function setUserInput($userInput){
         $this->userInput = trim(strtolower($userInput));
-        if($this->userInput == 'exit'){
+        if($this->userInput == 'exit' || $this->remainingShips < 1 && $userInput === 'no'){
             exit();
+        } elseif($this->remainingShips < 1 && $userInput === 'yes'){
+            $this->newGame();
+            $this->makeTurn();
         }
     }
 

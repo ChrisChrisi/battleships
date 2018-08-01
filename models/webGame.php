@@ -5,7 +5,7 @@ class WebGame extends Game
     public function initGame()
     {
         session_start();
-        if (!isset($_SESSION['game'])) {
+        if (!isset($_SESSION['game']) || $_SESSION['game']['remaining_ships'] < 1) {
             $this->newGame();
         } else {
             $this->loadGame($_SESSION['game']);

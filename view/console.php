@@ -1,10 +1,12 @@
 <?php
 
+$inputMsg = $this->remainingShips > 0 ? Messages::getMessage('prompt') .':'. SPACE : Messages::getMessage('play_again') . SPACE . '(yes / no):'.SPACE;
 if ($this->message != false) {
-    echo NEW_LINE.$this->message;
+    echo NEW_LINE . $this->message.NEW_LINE;
 }
-echo NEW_LINE.$data.NEW_LINE;
-
-$this->setUserInput(readline( Messages::getMessage('prompt') .' '));
+if ($this->remainingShips > 0) {
+    echo NEW_LINE . $data . NEW_LINE;
+}
+$this->setUserInput(readline($inputMsg));
 
 $this->makeTurn();

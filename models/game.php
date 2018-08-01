@@ -7,7 +7,7 @@ abstract class Game
     protected $rowsNames;
     protected $ships;
     private $letters = array();
-    private $displayMode = 'play';
+    protected $displayMode = 'play';
     protected $remainingShips;
     public $message = false;
 
@@ -32,6 +32,7 @@ abstract class Game
         $this->initBoard();
         $this->initShips();
         $this->playerTurns = 0;
+        $this->displayMode = 'play';
     }
 
     private function initBoard()
