@@ -9,7 +9,7 @@ class WebGame extends Game
     public function initGame()
     {
         session_start();
-
+        $this->newGame();
         if (!isset($_SESSION['game']) || $_SESSION['game']['remaining_ships'] < 1) {
             $this->newGame();
         } else {

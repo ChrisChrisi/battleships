@@ -15,7 +15,7 @@ const MISS_SYMBOL = '-';
 const HIT_SYMBOL = 'X';
 
 const SHIPS = array(
-    'battleship' => array('count' => 1, 'size' => 2),
-    'destroyer' => array('count' => 1, 'size' => 1)
+    'battleship' => array('count' => 1, 'size' => 5),
+    'destroyer' => array('count' => 2, 'size' => 4)
 );
 

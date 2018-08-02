@@ -66,7 +66,9 @@ abstract class Game
         $shipIndex = 0;
         foreach (SHIPS as $type => $info) {
             for ($index = 0; $index < $info['count']; $index++) {
-                $this->ships[] = $this->setShipToBoard(ShipFactory::create($type), $shipIndex);
+                $ship = ShipFactory::create($type);
+                $this->ships[] = $ship;
+                $this->setShipToBoard(ShipFactory::create($type), $shipIndex);
                 $shipIndex++;
             }
         }
@@ -306,6 +308,13 @@ abstract class Game
 
     }
 
+    public function getBoard(){
+        return $this->board;
+    }
+
+    public function getShips(){
+        return $this->ships;
+    }
     abstract public function initGame();
 
     abstract public function newGame();
