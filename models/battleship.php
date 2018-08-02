@@ -6,4 +6,9 @@ class Battleship extends Ship
     {
         $this->shipSize = SHIPS['battleship']['size'];
     }
+
+    public function getShipType()
+    {
+        return 'battleship';
+    }
 }

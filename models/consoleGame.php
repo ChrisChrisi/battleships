@@ -39,7 +39,7 @@ class consoleGame extends Game
     {
         // the board string is used in the view
         $data = $this->getBoardAsString();
-        require VIEW_PATH . 'console.php';
+        require VIEW_PATH.'console.php';
     }
 
     /**
@@ -50,9 +50,9 @@ class consoleGame extends Game
     {
         //prepare the input
         $this->userInput = trim(strtolower($userInput));
-        if ($this->userInput == 'exit' || $this->remainingShips < 1 && ($userInput === 'no' || $userInput === 'n' )) {
+        if ($this->userInput == 'exit' || $this->remainingShips < 1 && ($userInput === 'no' || $userInput === 'n')) {
             exit();
-        } elseif ($this->remainingShips < 1 && ($userInput === 'yes' || $userInput === 'y' )) {
+        } elseif ($this->remainingShips < 1 && ($userInput === 'yes' || $userInput === 'y')) {
             $this->newGame();
             $this->makeTurn();
         }

@@ -4,8 +4,8 @@ use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\Exception;
 
 chdir(dirname(__FILE__));
-require_once dirname(__FILE__) . '/../libs/config.php';
-require_once LIBS_PATH . 'autoloader.php';
+require_once dirname(__FILE__).'/../libs/config.php';
+require_once LIBS_PATH.'autoloader.php';
 
 class BattleshipTest extends TestCase
 {
@@ -33,7 +33,7 @@ class BattleshipTest extends TestCase
         try {
             $this->assertEquals($battleship->getSize(), SHIPS['battleship']['size']);
         } catch (Exception $exception) {
-            $this->fail('battleship size should be ' . SHIPS['battleship']['size']);
+            $this->fail('battleship size should be '.SHIPS['battleship']['size']);
         }
     }
 
@@ -50,7 +50,19 @@ class BattleshipTest extends TestCase
         try {
             $this->assertTrue($battleship->isSunk);
         } catch (Exception $exception) {
-            $this->fail('battleship should be sunk after ' . $shots . ' shots');
+            $this->fail('battleship should be sunk after '.$shots.' shots');
+        }
+    }
+
+    public function testShipPlacement()
+    {
+        $placement = array(array('rIndex' => 'A', 'cIndex' => 1), array('rIndex' => 'A', 'cIndex' => 2), array('rIndex' => 'A', 'cIndex' => 3), array('rIndex' => 'A', 'cIndex' => 4), array('rIndex' => 'A', 'cIndex' => 5));
+        $ship = ShipFactory::create('battleship');
+        $ship->setPlacement($placement);
+        try {
+            $this->assertEquals($ship->getPlacement(), $placement);
+        } catch (Exception $exception) {
+            $this->fail('wrong battleship placement');
         }
     }
 

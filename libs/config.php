@@ -1,9 +1,9 @@
 <?php
-define('LIBS_PATH', dirname(__FILE__) . '/');
-define('PATH', LIBS_PATH . '../');
-define('CN_PATH', PATH . 'controllers/');
-define('MD_PATH', PATH . 'models/');
-define('VIEW_PATH', PATH . 'view/');
+define('LIBS_PATH', dirname(__FILE__).'/');
+define('PATH', LIBS_PATH.'../');
+define('CN_PATH', PATH.'controllers/');
+define('MD_PATH', PATH.'models/');
+define('VIEW_PATH', PATH.'view/');
 
 define('NEW_LINE', chr(10));
 const SPACE = ' ';

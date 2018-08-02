@@ -3,7 +3,8 @@
 // class that manages the visualization of the game
 class BoardVisualizer
 {
-    public static function stringifyBoard($board, $displayMode){
+    public static function stringifyBoard($board, $displayMode)
+    {
         return $displayMode === 'play' ? self::showPlayBoard($board) : self::showRemainingShips($board);
     }
 
@@ -16,16 +17,16 @@ class BoardVisualizer
     {
         $string = '';
         for ($i = 1; $i <= BOARD_COLS; $i++) {
-            $string .= SPACE . SPACE . $i;
+            $string .= SPACE.SPACE.$i;
         }
         $string .= NEW_LINE;
         foreach ($board as $index => $row) {
-            $string .= $index . SPACE;
+            $string .= $index.SPACE;
             foreach ($row as $cell) {
                 if (!is_null($cell['ship']) && $cell['symbol'] != HIT_SYMBOL) {
-                    $string .= 'X' . SPACE . SPACE;
+                    $string .= 'X'.SPACE.SPACE;
                 } else {
-                    $string .= SPACE . SPACE . SPACE;
+                    $string .= SPACE.SPACE.SPACE;
                 }
             }
             $string .= NEW_LINE;
@@ -42,14 +43,14 @@ class BoardVisualizer
     {
         $string = '';
         for ($i = 1; $i <= BOARD_COLS; $i++) {
-            $string .= SPACE . SPACE . $i;
+            $string .= SPACE.SPACE.$i;
         }
         $string .= NEW_LINE;
 
         foreach ($board as $index => $row) {
-            $string .= $index . SPACE;
+            $string .= $index.SPACE;
             foreach ($row as $cell) {
-                $string .= $cell['symbol'] . SPACE . SPACE;
+                $string .= $cell['symbol'].SPACE.SPACE;
             }
             $string .= NEW_LINE;
         }

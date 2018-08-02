@@ -62,7 +62,7 @@ class WebGame extends Game
     {
         //the board string is used in the view
         $data = $this->getBoardAsString();
-        require VIEW_PATH . 'web.php';
+        require VIEW_PATH.'web.php';
 
     }
 }

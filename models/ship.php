@@ -1,7 +1,7 @@
 <?php
 
 //core ship class
-class Ship
+abstract class Ship
 {
     protected $shipSize = 0;
     protected $placement; // the position of the ship on the board
@@ -37,5 +37,14 @@ class Ship
     {
         return $this->placement;
     }
+
+    public function getHitsNumber(){
+        return $this->hitsNumber;
+    }
+
+    public function getShipSize(){
+        return $this->shipSize;
+    }
+    public abstract function getShipType();
 
 }

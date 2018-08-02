@@ -201,7 +201,7 @@ abstract class Game
     /**
      * process and apply the user command
      */
-    protected function play()
+    public function play()
     {
         $userInput = $this->getUserInput();
         if (strlen($userInput) == 0) {
@@ -212,7 +212,7 @@ abstract class Game
             $userAction = new UserAction($userInput);
             $action = $userAction->processCommand();
             // execute the user command
-            $functionName = 'command' . lcfirst($action['command']);
+            $functionName = 'command'.lcfirst($action['command']);
             if ($action['command'] === 'play') {
                 $result = $this->commandPlay($action['coordinates']);
             } else {
@@ -294,7 +294,7 @@ abstract class Game
                     } else {
                         $this->message = Messages::getMessage('sunk');
                     }
-                  // the ship is not sunk just hit
+                    // the ship is not sunk just hit
                 } else {
                     $this->message = Messages::getMessage('hit');
                 }
@@ -304,17 +304,35 @@ abstract class Game
 
     public function getBoardAsString()
     {
-       return BoardVisualizer::stringifyBoard($this->board, $this->displayMode);
+        return BoardVisualizer::stringifyBoard($this->board, $this->displayMode);
 
     }
 
-    public function getBoard(){
+    public function getBoard()
+    {
         return $this->board;
     }
 
-    public function getShips(){
+    public function getShips()
+    {
         return $this->ships;
     }
+
+    public function getDisplayMode()
+    {
+        return $this->displayMode;
+    }
+
+    public function getPlayerTurns()
+    {
+        return $this->playerTurns;
+    }
+
+    public function getRemainingShips()
+    {
+        return $this->remainingShips;
+    }
+
     abstract public function initGame();
 
     abstract public function newGame();
