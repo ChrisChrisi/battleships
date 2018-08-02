@@ -12,7 +12,8 @@ class Messages
         'prompt' => 'Enter coordinates (row, col), e.g. A5'
     );
 
-    public static function getMessage($name){
+    public static function getMessage($name)
+    {
         return self::$results[$name];
     }
 }

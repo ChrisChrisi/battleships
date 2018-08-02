@@ -1,12 +1,15 @@
 <html>
 <body>
+
 <?php
+echo '<pre>';
 if ($this->remainingShips > 0) {
 if ($this->message != false) {
-    echo $this->message.NEW_LINE;
+    echo $this->message;
+} else {
+    echo NEW_LINE;
 }
-echo '<pre>';
-echo NEW_LINE . NEW_LINE . $data;
+echo NEW_LINE . NEW_LINE . $data. NEW_LINE;
 ?>
 </pre>
 <form name="input" action="index.php" method="post">

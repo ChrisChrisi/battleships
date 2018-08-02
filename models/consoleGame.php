@@ -3,6 +3,10 @@
 class consoleGame extends Game
 {
     private $userInput;
+
+    /**
+     * Initializing the game
+     */
     public function initGame()
     {
         $this->newGame();
@@ -14,7 +18,11 @@ class consoleGame extends Game
         $this->createNewGame();
     }
 
-    public function makeTurn(){
+    /**
+     * process the user's command and display the board
+     */
+    public function makeTurn()
+    {
         $this->play();
         $this->show();
     }
@@ -23,16 +31,28 @@ class consoleGame extends Game
     {
         return $this->userInput;
     }
-    public function show(){
-        $data = $this->stringifyBoard();
-        require VIEW_PATH.'console.php';
+
+    /**
+     * load the view and show the game
+     */
+    public function show()
+    {
+        // the board string is used in the view
+        $data = $this->getBoardAsString();
+        require VIEW_PATH . 'console.php';
     }
 
-    public function setUserInput($userInput){
+    /**
+     * Set user input and if a special console command is typed - execute it
+     * @param $userInput
+     */
+    public function setUserInput($userInput)
+    {
+        //prepare the input
         $this->userInput = trim(strtolower($userInput));
-        if($this->userInput == 'exit' || $this->remainingShips < 1 && $userInput === 'no'){
+        if ($this->userInput == 'exit' || $this->remainingShips < 1 && ($userInput === 'no' || $userInput === 'n' )) {
             exit();
-        } elseif($this->remainingShips < 1 && $userInput === 'yes'){
+        } elseif ($this->remainingShips < 1 && ($userInput === 'yes' || $userInput === 'y' )) {
             $this->newGame();
             $this->makeTurn();
         }

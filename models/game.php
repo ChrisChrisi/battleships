@@ -1,21 +1,24 @@
 <?php
 
+// core battleships game class
 abstract class Game
 {
-    protected $playerTurns = 0;
-    protected $board;
-    protected $rowsNames;
+    protected $playerTurns; //how many turns the player made
+    protected $board; // game board
     protected $ships;
-    private $letters = array();
+    private $letters = array(); // board rows letters
     protected $displayMode = 'play';
-    protected $remainingShips;
-    public $message = false;
+    protected $remainingShips; // the count of remaining not sunk ships
+    public $message = false; // current display message for the game (miss, hit, ect.)
 
     public function __construct()
     {
         $this->setLetters();
     }
 
+    /**
+     * Generate board rows letters
+     */
     private function setLetters()
     {
         $curLetter = 'A';
@@ -27,6 +30,10 @@ abstract class Game
         }
     }
 
+    /**
+     * Generate new game
+     * creating and placing new board and ships
+     */
     protected function createNewGame()
     {
         $this->initBoard();
@@ -35,16 +42,25 @@ abstract class Game
         $this->displayMode = 'play';
     }
 
+    /**
+     * Create empty board without ships
+     * the board dimensions are taken form the config
+     */
     private function initBoard()
     {
-        foreach ($this->letters as $rindex) {
-            $this->board[$rindex] = array();
-            for ($cindex = 1; $cindex <= BOARD_COLS; $cindex++) {
-                $this->board[$rindex][$cindex] = array('ship' => null, 'symbol' => HIDDEN_SYMBOL);
+        foreach ($this->letters as $rIndex) {
+            $this->board[$rIndex] = array();
+            for ($cIndex = 1; $cIndex <= BOARD_COLS; $cIndex++) {
+                //ship is index of the placed ship object on the board stored in ships
+                $this->board[$rIndex][$cIndex] = array('ship' => null, 'symbol' => HIDDEN_SYMBOL);
             }
         }
     }
 
+    /**
+     * Create new ships and place them on the board
+     * the ships size and count is taken from the config
+     */
     private function initShips()
     {
         $shipIndex = 0;
@@ -57,32 +73,55 @@ abstract class Game
         $this->remainingShips = $shipIndex;
     }
 
-    private function setShipToBoard($ship, $shipIndex)
+    /**
+     * Place ship on the board
+     * @param Ship $ship - generated ship
+     * @param $shipIndex - index of the ship in the ships
+     * @return bool
+     */
+    private function setShipToBoard(Ship $ship, $shipIndex)
     {
+        //generate random place on the board
         $rNum = mt_rand(0, BOARD_ROWS - 1);
-        $rindex = $this->letters[$rNum];
-        $cindex = mt_rand(1, BOARD_COLS);
-        if (isset($this->board[$rindex]) && isset($this->board[$rindex][$cindex]) && is_null($this->board[$rindex][$cindex]['ship'])) {
-            $placement = $this->getAvailablePlace($rNum, $rindex, $cindex, $ship->getSize());
+        //convert the row number to the corresponding letter
+        $rIndex = $this->letters[$rNum];
+        $cIndex = mt_rand(1, BOARD_COLS);
+        //if the place is empty(has ho ship)
+        // try to place ship on the board starting from this place
+        if (is_null($this->board[$rIndex][$cIndex]['ship'])) {
+            $placement = $this->getAvailablePlace($rNum, $rIndex, $cIndex, $ship->getSize());
             if ($placement !== false) {
                 $ship->setPlacement($placement);
                 $this->ships[$shipIndex] = $ship;
                 foreach ($placement as $place) {
-                    $this->board[$place['rindex']][$place['cindex']]['ship'] = $shipIndex;
+                    $this->board[$place['rIndex']][$place['cIndex']]['ship'] = $shipIndex;
                 }
                 return true;
             }
         }
+        // if the ship cannot be place from the chosen starting board place
+        // try with another place
         $this->setShipToBoard($ship, $shipIndex);
     }
 
-    private function getAvailablePlace($rindexNum, $rindex, $cindex, $size)
+    /**
+     * Find available position for a ship on the game board
+     * @param $rIndexNum - starting board place row number
+     * @param $rIndex - starting board place row letter
+     * @param $cIndex - starting board place column number
+     * @param $size - length of the ship to be placed
+     * @return array|bool - array with coordinates of the available position for the ship to be placed
+     *         or false is such position was not found
+     */
+    private function getAvailablePlace($rIndexNum, $rIndex, $cIndex, $size)
     {
         $availablePlace = false;
-        $directons = array('up', 'down', 'right', 'left');
-        shuffle($directons);
-        foreach ($directons as $directon) {
-            $available = $this->checkAvailability($rindexNum, $rindex, $cindex, $size, $directon);
+        $directions = array('up', 'down', 'right', 'left');
+        // randomize the direction of placing so that each ship could be placed on different direction
+        shuffle($directions);
+        // try each direction for placement and stop when you find available
+        foreach ($directions as $direction) {
+            $available = $this->checkAvailability($rIndexNum, $rIndex, $cIndex, $size, $direction);
             if ($available !== false) {
                 $availablePlace = $available;
                 break;
@@ -91,62 +130,86 @@ abstract class Game
         return $availablePlace;
     }
 
-    private function checkAvailability($rindexNum, $rindex, $cindex, $size, $direction)
+    /**
+     * Check if a ship can be placed on a position
+     * The position is defined with starting cell, length of the ship and direction
+     * @param $rIndexNum - starting board place row number
+     * @param $rIndex - starting board place row letter
+     * @param $cIndex - starting board place column number
+     * @param $size - length of the ship to be placed
+     * @param $direction - direction to which the ship will be placed
+     * @return array|bool - array with coordinates of the available position for the ship to be placed
+     *         or false is the position is not available
+     */
+    private function checkAvailability($rIndexNum, $rIndex, $cIndex, $size, $direction)
     {
+        //because the first segment of the ship is placed on the given initial place
+        //to find the position of the last segment of the ship we should subtract one from the ship legth
         $size--;
+        //calculate the starting and ending places of the ship
         switch ($direction) {
             case 'up':
-                $firstRIndexNum = $rindexNum - $size;
-                $lastRIndexNum = $rindexNum;
+                $firstRIndexNum = $rIndexNum - $size;
+                $lastRIndexNum = $rIndexNum;
                 break;
             case 'down':
-                $firstRIndexNum = $rindexNum;
-                $lastRIndexNum = $rindexNum + $size;
+                $firstRIndexNum = $rIndexNum;
+                $lastRIndexNum = $rIndexNum + $size;
                 break;
             case 'right':
-                $firstCIndex = $cindex;
-                $lastCIndex = $cindex + $size;
+                $firstCIndex = $cIndex;
+                $lastCIndex = $cIndex + $size;
                 break;
             case 'left':
-                $firstCIndex = $cindex - $size;
-                $lastCIndex = $cindex;
+                $firstCIndex = $cIndex - $size;
+                $lastCIndex = $cIndex;
                 break;
 
         }
 
         $available = false;
+        //checking placing ship vertically
         if (isset($firstRIndexNum)) {
-            if (isset($this->letters[$firstRIndexNum]) && isset($this->letters[$lastRIndexNum]) && is_null($this->board[$this->letters[$lastRIndexNum]][$cindex]['ship'])) {
+            // if the placement is withing the game board and the last ship placement cell is free
+            // check if the other placement cells are free and store the available coordinates
+            if (isset($this->letters[$firstRIndexNum]) && isset($this->letters[$lastRIndexNum]) && is_null($this->board[$this->letters[$lastRIndexNum]][$cIndex]['ship'])) {
                 for ($index = $firstRIndexNum; $index <= $lastRIndexNum; $index++) {
-                    if (!is_null($this->board[$this->letters[$index]][$cindex]['ship'])) {
+                    if (!is_null($this->board[$this->letters[$index]][$cIndex]['ship'])) {
                         $available = false;
                         break;
                     }
-                    $available[] = array('rindex' => $this->letters[$index], 'cindex' => $cindex);
+                    $available[] = array('rIndex' => $this->letters[$index], 'cIndex' => $cIndex);
                 }
             }
-        } elseif ($firstCIndex > 0 && $lastCIndex < BOARD_COLS && isset($this->board[$rindex][$lastCIndex]) && is_null($this->board[$rindex][$lastCIndex]['ship'])) {
+            //checking placing ship horizontally
+            // if the placement is withing the game board and the last ship placement cell is free
+            // check if the other placement cells are free and store the available coordinates
+        } elseif ($firstCIndex > 0 && $lastCIndex < BOARD_COLS && isset($this->board[$rIndex][$lastCIndex]) && is_null($this->board[$rIndex][$lastCIndex]['ship'])) {
             for ($index = $firstCIndex; $index <= $lastCIndex; $index++) {
-                if (!is_null($this->board[$rindex][$index]['ship'])) {
+                if (!is_null($this->board[$rIndex][$index]['ship'])) {
                     $available = false;
                     break;
                 }
-                $available[] = array('rindex' => $rindex, 'cindex' => $index);
+                $available[] = array('rIndex' => $rIndex, 'cIndex' => $index);
             }
         }
         return $available;
     }
 
+    /**
+     * process and apply the user command
+     */
     protected function play()
     {
-        $result = false;
         $userInput = $this->getUserInput();
         if (strlen($userInput) == 0) {
             $result = true;
             $this->message = false;
         } else {
+            // convert user action to a command
             $userAction = new UserAction($userInput);
             $action = $userAction->processCommand();
+            // execute the user command
             $functionName = 'command' . lcfirst($action['command']);
             if ($action['command'] === 'play') {
                 $result = $this->commandPlay($action['coordinates']);
@@ -154,15 +217,21 @@ abstract class Game
                 $result = is_callable(array($this, $functionName)) ? $this->{$functionName}() : false;
             }
         }
+        //if the user coordinates are wrong execute error
         if ($result === false) {
             $this->commandError();
         }
     }
 
+    /**
+     * Process the user shooting
+     * @param $coordinates - coordinates of the place where the shooting is made
+     * @return bool - if the shooting was made or the coordinates are wrong
+     */
     public function commandPlay($coordinates)
     {
         $this->displayMode = 'play';
-        if (!isset($this->board[$coordinates['rindex']]) || !isset($this->board[$coordinates['rindex']][$coordinates['cindex']])) {
+        if (!isset($this->board[$coordinates['rIndex']]) || !isset($this->board[$coordinates['rIndex']][$coordinates['cIndex']])) {
 
             $this->commandError();
             return false;
@@ -172,45 +241,58 @@ abstract class Game
         return true;
     }
 
+    // apply "show remaining ships" command
     public function commandShow()
     {
         $this->displayMode = 'show';
         $this->message = false;
     }
 
+    // apply "reset game" command
     public function commandReset()
     {
         $this->displayMode = 'play';
         $this->createNewGame();
     }
 
+    // invalid command
     public function commandError()
     {
         $this->displayMode = 'play';
         $this->message = Messages::getMessage('error');
     }
 
+    /**
+     * Make shot on the game board
+     * @param $coordinates - coordinates of the shot
+     */
     private function shoot($coordinates)
     {
-        $cell = $this->board[$coordinates['rindex']][$coordinates['cindex']];
+        $cell = $this->board[$coordinates['rIndex']][$coordinates['cIndex']];
+        // if that place was already shot, then it's a miss
         if ($cell['symbol'] !== HIDDEN_SYMBOL) {
             $this->message = Messages::getMessage('miss');
         } else {
+            //if there is no ship on this place it's a miss
             if (is_null($cell['ship'])) {
-                $this->board[$coordinates['rindex']][$coordinates['cindex']]['symbol'] = MISS_SYMBOL;
+                $this->board[$coordinates['rIndex']][$coordinates['cIndex']]['symbol'] = MISS_SYMBOL;
                 $this->message = Messages::getMessage('miss');
+                //a ship part was shot
             } else {
-                $this->board[$coordinates['rindex']][$coordinates['cindex']]['symbol'] = HIT_SYMBOL;
+                // mark the board and the ship
+                $this->board[$coordinates['rIndex']][$coordinates['cIndex']]['symbol'] = HIT_SYMBOL;
                 $ship = $this->ships[$cell['ship']];
                 $ship->hit();
                 if ($ship->isSunk) {
                     --$this->remainingShips;
-                    if($this->remainingShips < 1){
+                    if ($this->remainingShips < 1) {
+                        // if the last ship is shot then the game is over and the user wins
                         $this->message = Messages::getMessage('win');
-                        $this->message = str_replace("%count",$this->playerTurns,$this->message);
+                        $this->message = str_replace("%count", $this->playerTurns, $this->message);
                     } else {
                         $this->message = Messages::getMessage('sunk');
                     }
+                  // the ship is not sunk just hit
                 } else {
                     $this->message = Messages::getMessage('hit');
                 }
@@ -218,49 +300,10 @@ abstract class Game
         }
     }
 
-    public function stringifyBoard()
+    public function getBoardAsString()
     {
-        return $this->displayMode === 'play' ? $this->showPlayBoard() : $this->showRemainingShips();
+       return BoardVisualizer::stringifyBoard($this->board, $this->displayMode);
 
-    }
-
-    public function showRemainingShips()
-    {
-        $string = '';
-        for ($i = 1; $i <= BOARD_COLS; $i++) {
-            $string .= SPACE . SPACE . $i;
-        }
-        $string .= NEW_LINE;
-        foreach ($this->board as $index => $row) {
-            $string .= $index . SPACE;
-            foreach ($row as $cell) {
-                if (!is_null($cell['ship']) && $cell['symbol'] != HIT_SYMBOL) {
-                    $string .= 'X' . SPACE . SPACE;
-                } else {
-                    $string .= SPACE . SPACE . SPACE;
-                }
-            }
-            $string .= NEW_LINE;
-        }
-        return $string;
-    }
-
-    public function showPlayBoard()
-    {
-        $string = '';
-        for ($i = 1; $i <= BOARD_COLS; $i++) {
-            $string .= SPACE . SPACE . $i;
-        }
-        $string .= NEW_LINE;
-
-        foreach ($this->board as $index => $row) {
-            $string .= $index . SPACE;
-            foreach ($row as $cell) {
-                $string .= $cell['symbol'] . SPACE . SPACE;
-            }
-            $string .= NEW_LINE;
-        }
-        return $string;
     }
 
     abstract public function initGame();

@@ -9,6 +9,7 @@ class UserAction
         $this->data = strtolower($data);
     }
 
+    // parse the user input and determine what command it if
     public function processCommand() {
         $command = 'fail';
         $coordinates = false;
@@ -28,7 +29,7 @@ class UserAction
     public function formatResult($command, $coordinates = false){
         $result = array('command' => $command);
         if(isset($coordinates)){
-            $result['coordinates'] = array('rindex' => strtoupper($coordinates[0]), 'cindex' => (int)$coordinates[1]);
+            $result['coordinates'] = array('rIndex' => strtoupper($coordinates[0]), 'cIndex' => (int)$coordinates[1]);
         }
         return $result;
     }
